@@ -33,8 +33,8 @@ class Server(BaseHTTPRequestHandler):
         post_sender = ":".join([str(n) for n in self.client_address])
             
         self._update_logfile(
-            ts=time.time()
-            time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f")
+            ts=time.time(),
+            time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f"),
             whois = post_sender,
             data = post_data.decode('ascii')
         )
