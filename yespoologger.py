@@ -3,6 +3,8 @@
 import time
 import os
 import argparse
+import ssl
+
 
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -42,12 +44,17 @@ class Server(BaseHTTPRequestHandler):
 
         
 class Logger(object):
-    def __init__(self, port=9090):
+    def __init__(self, port=9090, cert=None):
         self._port = port
+        self._path_to_cert = cert
     
     def run(self):
         server_address = ('', self._port)
         server = HTTPServer(server_address, Server)
+        
+        if self._path_to_cert is not None:
+            server.socket = ssl.wrap_socket (server.socket, certfile=self._path_to_cert, server_side=True)
+
         start_time = time.time()
         print('Starting server')
         try:
@@ -69,7 +76,8 @@ class Logger(object):
         
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description='POST HTTP Requests logger')
-    p.add_argument('-P', '--port', type=int, help='port')  
+    p.add_argument('-P', '--port', type=int, help='port')
+    p.add_argument('-S', '--SSLcert', type=str, help='Path to certfile')
     args = p.parse_args()
-    logger = Logger(port=args.port)
+    logger = Logger(port=args.port, cert=args.SSLcert)
     logger.run()
