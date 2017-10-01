@@ -10,10 +10,10 @@ from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class Server(BaseHTTPRequestHandler):
-    def _update_logfile(self, ts=time.time(), 
-                              time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f"),
+    def _update_logfile(self, ts=0.0, 
+                              time="unknown",
                               whois="unknown:unknown",
-                              data=''):
+                              data=""):
         
         self._logheader = "ts,datetime,user,data"
         self._logfilepath = ".post.log"
@@ -33,6 +33,8 @@ class Server(BaseHTTPRequestHandler):
         post_sender = ":".join([str(n) for n in self.client_address])
             
         self._update_logfile(
+            ts=time.time()
+            time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f")
             whois = post_sender,
             data = post_data.decode('ascii')
         )
