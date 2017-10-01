@@ -3,7 +3,7 @@ Just a very simple server which is recording HTTP POST requests to .log file
 
 # How to run
 
-logger.py [-P PORT]
+yespoologger.py [-P PORT]
 
 # How to stop
 
