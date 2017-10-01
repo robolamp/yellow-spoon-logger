@@ -27,7 +27,6 @@ class Server(BaseHTTPRequestHandler):
         file = open(self._logfilepath, 'a')
         file.write(logstring + "\n")
         file.close()
-        
 
     def do_POST(self):
         post_data = self.rfile.read(int(self.headers['Content-Length']))
@@ -44,16 +43,20 @@ class Server(BaseHTTPRequestHandler):
 
         
 class Logger(object):
-    def __init__(self, port=9090, cert=None):
+    def __init__(self, port=9090, cert=None, key=None):
         self._port = port
         self._path_to_cert = cert
+        self._path_to_key = key
     
     def run(self):
         server_address = ('', self._port)
         server = HTTPServer(server_address, Server)
         
-        if self._path_to_cert is not None:
-            server.socket = ssl.wrap_socket (server.socket, certfile=self._path_to_cert, server_side=True)
+        if self._path_to_cert is not None and self._path_to_key is not None:
+            server.socket = ssl.wrap_socket(server.socket, 
+                                            certfile=self._path_to_cert,
+                                            certfile=self._path_to_key, 
+                                            server_side=True)
 
         start_time = time.time()
         print('Starting server')
@@ -77,7 +80,8 @@ class Logger(object):
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description='POST HTTP Requests logger')
     p.add_argument('-P', '--port', type=int, help='port')
-    p.add_argument('-S', '--SSLcert', type=str, help='Path to certfile')
+    p.add_argument('-S', '--SSLcert', type=str, help='Path to SSL certfile')
+    p.add_argument('-K', '--SSLkey', type=str, help='Path to SSL keyfile')
     args = p.parse_args()
-    logger = Logger(port=args.port, cert=args.SSLcert)
+    logger = Logger(port=args.port, cert=args.SSLcert, key=args.SSLkey)
     logger.run()
