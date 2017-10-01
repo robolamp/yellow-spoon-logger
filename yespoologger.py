@@ -55,7 +55,7 @@ class Logger(object):
         if self._path_to_cert is not None and self._path_to_key is not None:
             server.socket = ssl.wrap_socket(server.socket, 
                                             certfile=self._path_to_cert,
-                                            certfile=self._path_to_key, 
+                                            keyfile=self._path_to_key, 
                                             server_side=True)
 
         start_time = time.time()
