@@ -3,7 +3,7 @@ Just a very simple server which is recording HTTP (and HTTPS) POST requests to .
 
 # How to run
 
-yespoologger.py [-P PORT] [-S path-to-SSLCERT] [-K path-to-SSLKEY]
+yespoologger.py [-P PORT] [-L path-to-logfile] [-S path-to-SSLCERT] [-K path-to-SSLKEY]
 
 If SSLcert and SSLKey aren't provided, it will work as HTTP server.
 
