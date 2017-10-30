@@ -42,14 +42,14 @@ class Server(BaseHTTPRequestHandler):
             ts=time.time(),
             time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f"),
             whois = req_sender,
-            data = req_data.decode('ascii')
+            data = req_data
         )
 
     def do_POST(self):
         req_data = self.rfile.read(int(self.headers['Content-Length']))
         req_sender = ":".join([str(n) for n in self.client_address])
 
-        self._log_request("POST", req_data, req_sender)
+        self._log_request("POST", req_data.decode('ascii'), req_sender)
 
         self.send_response(200, message="OK")
         self.end_headers()
