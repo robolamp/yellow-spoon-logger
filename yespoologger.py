@@ -5,19 +5,20 @@ import os
 import argparse
 import ssl
 
-
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse, unquote_plus
 
 LOG_FILE = ".post.log"
 
 class Server(BaseHTTPRequestHandler):
-    def _update_logfile(self, ts=0.0,
+    def _update_logfile(self, type="POST",
+                              ts=0.0,
                               time="unknown",
                               whois="unknown:unknown",
                               data=""):
 
-        self._logheader = "ts,datetime,user,data"
+        self._logheader = "type,ts,datetime,user,data"
         self._logfilepath = LOG_FILE
 
         if not os.path.exists(self._logfilepath):
@@ -25,26 +26,42 @@ class Server(BaseHTTPRequestHandler):
             file.write(self._logheader + "\n")
             file.close()
 
-        logstring = '{},{},{},{}'.format(str(ts), time, whois, str(data))
+        logstring = '{},{},{},{},{}'.format(type,
+                                            str(ts),
+                                            time,
+                                            whois,
+                                            str(data))
         file = open(self._logfilepath, 'a')
         file.write(logstring + "\n")
         file.close()
 
-    def do_POST(self):
-        post_data = self.rfile.read(int(self.headers['Content-Length']))
-        post_sender = ":".join([str(n) for n in self.client_address])
 
+    def _log_request(self, req_type, req_data, req_sender):
         self._update_logfile(
+            type = req_type,
             ts=time.time(),
             time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f"),
-            whois = post_sender,
-            data = post_data.decode('ascii')
+            whois = req_sender,
+            data = req_data
         )
 
+    def do_POST(self):
+        req_data = self.rfile.read(int(self.headers['Content-Length']))
+        req_data = req_data.decode('ascii')
+        req_sender = ":".join([str(n) for n in self.client_address])
+
+        self._log_request("POST", req_data, req_sender)
+
         self.send_response(200, message="OK")
-        self.send_header('Content-type', 'text/html')
         self.end_headers()
 
+    def do_GET(self):
+        req_data = unquote_plus(urlparse(self.path).query)
+        req_sender = ":".join([str(n) for n in self.client_address])
+        self._log_request("GET", req_data, req_sender)
+
+        self.send_response(200)
+        self.end_headers()
 
 class Logger(object):
     def __init__(self, port=9090, cert=None, key=None):
@@ -82,9 +99,9 @@ class Logger(object):
 
 
 if __name__ == '__main__':
-    p = argparse.ArgumentParser(description='POST HTTP Requests logger')
+    p = argparse.ArgumentParser(description='GET and POST HTTP Requests logger')
     p.add_argument('-P', '--port', type=int, help='port')
-    p.add_argument('-L', '--logfile', type=str, default=".post.log", help='Path to logfile')
+    p.add_argument('-L', '--logfile', type=str, default=".data.log", help='Path to logfile')
     p.add_argument('-S', '--SSLcert', type=str, help='Path to SSL certfile')
     p.add_argument('-K', '--SSLkey', type=str, help='Path to SSL keyfile')
     args = p.parse_args()
