@@ -12,12 +12,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 LOG_FILE = ".post.log"
 
 class Server(BaseHTTPRequestHandler):
-    def _update_logfile(self, ts=0.0,
+    def _update_logfile(self, type="POST",
+                              ts=0.0,
                               time="unknown",
                               whois="unknown:unknown",
                               data=""):
 
-        self._logheader = "ts,datetime,user,data"
+        self._logheader = "type,ts,datetime,user,data"
         self._logfilepath = LOG_FILE
 
         if not os.path.exists(self._logfilepath):
@@ -25,26 +26,41 @@ class Server(BaseHTTPRequestHandler):
             file.write(self._logheader + "\n")
             file.close()
 
-        logstring = '{},{},{},{}'.format(str(ts), time, whois, str(data))
+        logstring = '{},{},{},{},{}'.format(type,
+                                            str(ts),
+                                            time,
+                                            whois,
+                                            str(data))
         file = open(self._logfilepath, 'a')
         file.write(logstring + "\n")
         file.close()
 
-    def do_POST(self):
-        post_data = self.rfile.read(int(self.headers['Content-Length']))
-        post_sender = ":".join([str(n) for n in self.client_address])
+
+    def _log_request(self, req_type):
+        req_data = self.rfile.read(int(self.headers['Content-Length']))
+        req_sender = ":".join([str(n) for n in self.client_address])
 
         self._update_logfile(
-            ts=time.time(),
+            type = req_type,
+            ts=time.time()
             time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f"),
             whois = post_sender,
             data = post_data.decode('ascii')
         )
 
+    def do_POST(self):
+        self._log_request("POST")
+
         self.send_response(200, message="OK")
-        self.send_header('Content-type', 'text/html')
+        # self.send_header('Content-type', 'text/html')
         self.end_headers()
 
+    def do_GET(self):
+        self._log_request("GET")
+
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write('')
 
 class Logger(object):
     def __init__(self, port=9090, cert=None, key=None):
