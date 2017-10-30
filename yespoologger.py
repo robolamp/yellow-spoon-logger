@@ -42,17 +42,16 @@ class Server(BaseHTTPRequestHandler):
 
         self._update_logfile(
             type = req_type,
-            ts=time.time()
+            ts=time.time(),
             time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f"),
-            whois = post_sender,
-            data = post_data.decode('ascii')
+            whois = req_sender,
+            data = req_data.decode('ascii')
         )
 
     def do_POST(self):
         self._log_request("POST")
 
         self.send_response(200, message="OK")
-        # self.send_header('Content-type', 'text/html')
         self.end_headers()
 
     def do_GET(self):
@@ -60,7 +59,6 @@ class Server(BaseHTTPRequestHandler):
 
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('')
 
 class Logger(object):
     def __init__(self, port=9090, cert=None, key=None):
@@ -98,7 +96,7 @@ class Logger(object):
 
 
 if __name__ == '__main__':
-    p = argparse.ArgumentParser(description='POST HTTP Requests logger')
+    p = argparse.ArgumentParser(description='GET and POST HTTP Requests logger')
     p.add_argument('-P', '--port', type=int, help='port')
     p.add_argument('-L', '--logfile', type=str, default=".post.log", help='Path to logfile')
     p.add_argument('-S', '--SSLcert', type=str, help='Path to SSL certfile')
