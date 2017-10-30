@@ -98,7 +98,7 @@ class Logger(object):
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description='GET and POST HTTP Requests logger')
     p.add_argument('-P', '--port', type=int, help='port')
-    p.add_argument('-L', '--logfile', type=str, default=".post.log", help='Path to logfile')
+    p.add_argument('-L', '--logfile', type=str, default=".data.log", help='Path to logfile')
     p.add_argument('-S', '--SSLcert', type=str, help='Path to SSL certfile')
     p.add_argument('-K', '--SSLkey', type=str, help='Path to SSL keyfile')
     args = p.parse_args()
