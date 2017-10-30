@@ -7,7 +7,7 @@ import ssl
 
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote_plus
 
 LOG_FILE = ".post.log"
 
@@ -47,15 +47,16 @@ class Server(BaseHTTPRequestHandler):
 
     def do_POST(self):
         req_data = self.rfile.read(int(self.headers['Content-Length']))
+        req_data = req_data.decode('ascii')
         req_sender = ":".join([str(n) for n in self.client_address])
 
-        self._log_request("POST", req_data.decode('ascii'), req_sender)
+        self._log_request("POST", req_data, req_sender)
 
         self.send_response(200, message="OK")
         self.end_headers()
 
     def do_GET(self):
-        req_data = urlparse(self.path).query
+        req_data = unquote_plus(urlparse(self.path).query)
         req_sender = ":".join([str(n) for n in self.client_address])
         self._log_request("GET", req_data, req_sender)
 
