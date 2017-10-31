@@ -1,5 +1,5 @@
 # yellow-spoon-logger
-Just a very simple server which is recording HTTP (and HTTPS) POST requests to .log file
+Just a very simple server which is recording HTTP (and HTTPS) POST (and GET) requests to .log file
 
 # How to run
 
@@ -11,4 +11,4 @@ If SSLcert and SSLKey aren't provided, it will work as HTTP server.
 
 Just Ctrl+C
 
-The logfile will be at ./.post.log
+Default logfile path is ./.data.log
