@@ -4,6 +4,7 @@ import time
 import os
 import argparse
 import ssl
+import re
 
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -57,6 +58,7 @@ class Server(BaseHTTPRequestHandler):
 
     def do_GET(self):
         req_data = unquote_plus(urlparse(self.path).query)
+        req_data = re.split(r'&callback=jQuery', req_data)[0]
         req_sender = ":".join([str(n) for n in self.client_address])
         self._log_request("GET", req_data, req_sender)
 
