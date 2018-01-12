@@ -15,8 +15,8 @@ LOG_FILE = ".post.log"
 class Server(BaseHTTPRequestHandler):
     def _update_logfile(self, type="POST",
                               ts=0.0,
-                              time="unknown",
-                              whois="unknown:unknown",
+                              dtime=datetime(1970,1,1),
+                              whois="unknown",
                               data=""):
 
         self._logheader = "type,ts,datetime,user,data"
@@ -27,9 +27,13 @@ class Server(BaseHTTPRequestHandler):
             file.write(self._logheader + "\n")
             file.close()
 
-        logstring = '{},{},{},{},{}'.format(type,
-                                            str(ts),
-                                            time,
+        fts = "{0:.3f}".format(round(ts, 3))
+        ftime = dtime.strftime("%d %b %Y %H:%M:%S.")
+        ftime += str(round(int(dtime.strftime("%f")), -3))[:3]
+
+        logstring = "{},{},{},{},{}".format(type,
+                                            fts,
+                                            ftime,
                                             whois,
                                             str(data))
         file = open(self._logfilepath, 'a')
@@ -37,21 +41,24 @@ class Server(BaseHTTPRequestHandler):
         file.close()
 
 
-    def _log_request(self, req_type, req_data, req_sender):
+    def _log_request(self, req_type, req_data, req_ip):
+        ts = time.time()
+        now = datetime.now()
+
         self._update_logfile(
-            type = req_type,
-            ts=time.time(),
-            time=datetime.now().strftime("%d %b %Y %H:%M:%S.%f"),
-            whois = req_sender,
-            data = req_data
+            type=req_type,
+            ts=ts,
+            dtime=now,
+            whois=req_ip,
+            data=req_data
         )
 
     def do_POST(self):
         req_data = self.rfile.read(int(self.headers['Content-Length']))
         req_data = req_data.decode('ascii')
-        req_sender = ":".join([str(n) for n in self.client_address])
+        req_ip = self.client_address[0]
 
-        self._log_request("POST", req_data, req_sender)
+        self._log_request("POST", req_data, req_ip)
 
         self.send_response(200, message="OK")
         self.end_headers()
@@ -59,11 +66,13 @@ class Server(BaseHTTPRequestHandler):
     def do_GET(self):
         req_data = unquote_plus(urlparse(self.path).query)
         req_data = re.split(r'&callback=jQuery', req_data)[0]
-        req_sender = ":".join([str(n) for n in self.client_address])
-        self._log_request("GET", req_data, req_sender)
+        req_ip = self.client_address[0]
+        
+        self._log_request("GET", req_data, req_ip)
 
         self.send_response(200)
         self.end_headers()
+
 
 class Logger(object):
     def __init__(self, port=9090, cert=None, key=None):
