@@ -13,12 +13,12 @@ from urllib.parse import urlparse, unquote_plus
 LOG_FILE = ".post.log"
 
 class Server(BaseHTTPRequestHandler):
+    # Update or create logfile
     def _update_logfile(self, type="POST",
                               ts=0.0,
                               dtime=datetime(1970,1,1),
                               whois="unknown",
                               data=""):
-
         self._logheader = "type,ts,datetime,user,data"
         self._logfilepath = LOG_FILE
 
@@ -40,7 +40,7 @@ class Server(BaseHTTPRequestHandler):
         file.write(logstring + "\n")
         file.close()
 
-
+    # Compose request info
     def _log_request(self, req_type, req_data, req_ip):
         ts = time.time()
         now = datetime.now()
@@ -53,6 +53,7 @@ class Server(BaseHTTPRequestHandler):
             data=req_data
         )
 
+    # POST callback
     def do_POST(self):
         req_data = self.rfile.read(int(self.headers['Content-Length']))
         req_data = req_data.decode('ascii')
@@ -63,11 +64,12 @@ class Server(BaseHTTPRequestHandler):
         self.send_response(200, message="OK")
         self.end_headers()
 
+    # GET callback
     def do_GET(self):
         req_data = unquote_plus(urlparse(self.path).query)
         req_data = re.split(r'&callback=jQuery', req_data)[0]
         req_ip = self.client_address[0]
-        
+
         self._log_request("GET", req_data, req_ip)
 
         self.send_response(200)
@@ -80,10 +82,12 @@ class Logger(object):
         self._path_to_cert = cert
         self._path_to_key = key
 
+    # Run server until KeyboardInterrupt
     def run(self):
         server_address = ('', self._port)
         server = HTTPServer(server_address, Server)
 
+        # If certs are provided, convert socket to SSLSocket
         if self._path_to_cert is not None and self._path_to_key is not None:
             server.socket = ssl.wrap_socket(server.socket,
                                             certfile=self._path_to_cert,
