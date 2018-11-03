@@ -12,13 +12,14 @@ from urllib.parse import urlparse, unquote_plus
 
 LOG_FILE = ".post.log"
 
+
 class Server(BaseHTTPRequestHandler):
     # Update or create logfile
     def _update_logfile(self, type="POST",
-                              ts=0.0,
-                              dtime=datetime(1970,1,1),
-                              whois="unknown",
-                              data=""):
+                        ts=0.0,
+                        dtime=datetime(1970, 1, 1),
+                        whois="unknown",
+                        data=""):
         self._logheader = "type,ts,datetime,user,data"
         self._logfilepath = LOG_FILE
 
@@ -114,9 +115,11 @@ class Logger(object):
 
 
 if __name__ == '__main__':
-    p = argparse.ArgumentParser(description='GET and POST HTTP Requests logger')
+    p = argparse.ArgumentParser(
+        description='GET and POST HTTP Requests logger')
     p.add_argument('-P', '--port', type=int, help='port')
-    p.add_argument('-L', '--logfile', type=str, default=".data.log", help='Path to logfile')
+    p.add_argument('-L', '--logfile', type=str, default=".data.log",
+                   help='Path to logfile')
     p.add_argument('-S', '--SSLcert', type=str, help='Path to SSL certfile')
     p.add_argument('-K', '--SSLkey', type=str, help='Path to SSL keyfile')
     args = p.parse_args()
